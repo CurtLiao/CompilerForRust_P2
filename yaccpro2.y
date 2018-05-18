@@ -1,7 +1,6 @@
 %{  
 #define Trace(t)        printf(t)
 #include<stdio.h>
-#include<string.h>
 %}
 
 %union
@@ -16,7 +15,7 @@
 %type <mnString> type
 %type <mnString> const_val
 %token CONTINUE BREAK DO ELSE ENUM EXTERN FOR FN IF IN  LET LOOP MATCH MUT PRINT PRINTLN PUB RETURN SELF STATIC USE WHERE WHILE
-%token INT STRUCT BOOL FLOAT CHAR STR
+%token STRUCT CHAR  
 %token RIGHT_BRACE LEFT_BRACE RIGHT_BRACK LEFT_BRACK RIGHT_PARENT LEFT_PARENT COMMA COLON SEMICOLON            
 %token DIVIDE MUTI MINUS PLUS MOD MMINUS ADD NOTEQ LARGEREQ LESSEQ LARGER LESS EQ
 %token LOGICAL_AND LOGICAL_OR LOGICAL_NOT ASSIGN DIVIDE_ASSIGN PLUS_ASSIGN MINUS_ASSIGN TIMES_ASSIGN
@@ -28,6 +27,10 @@
 %token<mnString> STRING
 %token<mnString> TRUE
 %token<mnString> FALSE
+%token<mnString> STR
+%token<mnString> INT
+%token<mnString> BOOL
+%token<mnString> FLOAT
 
 
 
@@ -45,9 +48,9 @@
  
 %%
 program:	
-		id_declared func_declared{Trace("Reducing to program\n");} |
-		func_declared{Trace("Reducing to program\n");} |
-		id_declared{Trace("Reducing to program\n");}
+		normal_declared func_declared{Trace("Reducing to program\n");} |
+		normal_declared{Trace("Reducing to program FUCK\n");} |
+		func_declared{Trace("Reducing to program\n");}
 		;
 statement:	
 		statement simple SEMICOLON{Trace("Reducing to statement\n");} |
@@ -61,28 +64,29 @@ statement:
 		statement loop{Trace("Reducing to statement\n");} |
 		loop{Trace("Reducing to statement\n");}
 		;
+normal_declared:
+		normal_declared const_declared SEMICOLON{Trace("Reducing to normal1\n");} |
+		const_declared SEMICOLON{Trace("Reducing to normal2\n");} |
+		normal_declared var_declared SEMICOLON{Trace("Reducing to normal3\n");} |
+		var_declared SEMICOLON{Trace("Reducing to normal4\n");} |
+		normal_declared arr_declared SEMICOLON{Trace("Reducing to normal5\n");} |
+		arr_declared SEMICOLON{Trace("Reducing to normal6\n");}
+		;
+		
 //FUNCTION DEFINE
 func_declared:
 		FN IDENTIFIER LEFT_PARENT formal_argu RIGHT_PARENT MINUS LARGER type block{Trace("Reducing to func_declared\n");} |
 		FN IDENTIFIER LEFT_PARENT RIGHT_PARENT MINUS LARGER type block{Trace("Reducing to func_declared no formal argumen\nt");} |
 		FN IDENTIFIER LEFT_PARENT formal_argu RIGHT_PARENT block{Trace("Reducing to func_declared no type\n");} |
 		FN IDENTIFIER LEFT_PARENT RIGHT_PARENT block{Trace("Reducing to func_declared with nothing\n");} |
-		; 
+		;
+
 formal_argu:
 		formal_argu IDENTIFIER COLON type |
 		IDENTIFIER COLON type
 		;
 
 //ID DEFINE
-id_declared:	
-		id_declared const_declared SEMICOLON{Trace("Reducing to id_declared 1\n");} |
-		const_declared SEMICOLON{Trace("Reducing to id_declared 2\n");} |
-		id_declared var_declared SEMICOLON{Trace("Reducing to id_declared 3\n");} |
-		var_declared SEMICOLON{Trace("Reducing to id_declared 4\n");} |
-		id_declared arr_declared SEMICOLON{Trace("Reducing to id_declared 5\n");} |
-		arr_declared SEMICOLON {Trace("Reducing to id_declared 6\n");}
-		;
-
 var_declared:
 		LET MUT IDENTIFIER{
 			Trace("Reducing to var_declared no type&value\n");
@@ -100,7 +104,6 @@ var_declared:
 		
 const_declared:
 		LET IDENTIFIER ASSIGN const_val{
-			Trace("Reducing to const declared\n");
 			if(NodeSearch(Top(SymbolTable)->Table,$2)==NULL){
 				Node *nNode = NodeCreate($2);
 				if(typeVal == 0){
@@ -130,6 +133,7 @@ const_declared:
 					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
 				}
 				else if(typeVal == 2){
+					
 					char *temp = strdup($4);
 					void *val = (void*)temp;
 					nNode->type = "const_string";
@@ -146,9 +150,10 @@ const_declared:
 			else{
 				printf("Identifier %s existed\n",$2);
 			}
+			Trace("Reducing to const declareda\n");
 		} |
 		LET IDENTIFIER COLON type ASSIGN const_val{
-			Trace("Reducing to const declared\n");
+			Trace("Reducing to const declaredA\n");
 			if(NodeSearch(Top(SymbolTable)->Table,$2)==NULL){
 				Node *nNode = NodeCreate($2);
 				if(typeVal == 0){
@@ -171,7 +176,7 @@ const_declared:
 				   }
 			 	   else{
 					float *temp = (float*)malloc(sizeof(float));
-					*temp = atoi($6);
+					*temp = atof($6);
 					void *val = (void*)temp;
 					nNode->type = "float";
 					nNode->value = val;
@@ -180,8 +185,8 @@ const_declared:
 				    }
 				  }
 				else if(typeVal == 2){
-				   if(strcmp("str",$4)!=0){
-					printf("error type %d is not %s type\n",atoi($6),$4);
+				   if(strcmp("string",$4)!=0){
+					printf("error type %s is not %s type\n",$6,$4);
 				   }
 			 	   else{
 					char *temp = strdup($6);
@@ -223,7 +228,6 @@ simple:
 		IDENTIFIER ASSIGN bool_exp{Trace("Reducing to simple\n");}|
 		PRINT exp{Trace("Reducing to simple\n");} |
 		PRINTLN exp{Trace("Reducing to simple\n");} |
-		//READ IDENTIFIER{{Trace("Reducing to simple\n");}} |
 		RETURN{Trace("Reducing to simple\n");} |
 		RETURN exp{Trace("Reducing to simple\n");}
 		;
@@ -280,19 +284,23 @@ const_val:
 		INTEGER{
 			$$ = $1; 
 			typeVal = 0;
-		} |
+		}
+		|
 		REAL{
 			$$ = $1;
 			typeVal = 1;
-		} |
+		}
+		|
 		TRUE{
 			$$ = $1;
 			typeVal = 3;
-		} |
+		}
+		|
 		FALSE{
 			$$ = $1;
 			typeVal = 3;
-		} |
+		}
+		|
 		STRING{
 			$$ = $1;
 			typeVal = 2;
@@ -300,24 +308,24 @@ const_val:
 		}
 		;
 type:		
-		BOOL{$$ = "bool";typeVal = 3;} |
-		INT{$$ = "int";typeVal = 0;} |
-		STR{$$ = "string";typeVal = 2;Trace("Reducing to type string\n");} |
-		FLOAT{$$ = "float";typeVal = 1;}
+		BOOL{
+			$$ = "bool";
+			typeVal = 3;
+		} |
+		INT{
+			$$ = "int";
+			typeVal = 0;
+		} |
+		STR{
+			$$ = "string";
+			typeVal = 2;
+			Trace("Reducing to type string\n");
+		} |
+		FLOAT{
+			$$ = "float";
+			typeVal = 1;
+		}
 		;
-
-/*program:        identifier semi
-                {
-                Trace("Reducing to program\n");
-                }
-                ;
-
-semi:           SEMICOLON
-                {
-                Trace("Reducing to semi\n");
-                }
-                ;
-*/
 %%
 #include "lex.yy.c"
 

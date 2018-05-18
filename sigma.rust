@@ -1,0 +1,6 @@
+let a:int = 1;
+let c:bool =false;
+let s:str = "adada";
+//let i = -25;
+//let f:float = 3.14;
+//let b:bool = true;

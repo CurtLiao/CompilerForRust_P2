@@ -14,4 +14,4 @@ symbols.o: symbols.c symbols.h
 	gcc -c -g symbols.c
 
 clean:
-	rm -f *.o lex.yy.c y.tab.h
+	rm -f *.o lex.yy.c y.tab.h y.tab.c
