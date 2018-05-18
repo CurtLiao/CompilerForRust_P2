@@ -13,23 +13,24 @@
 
 
 /* tokens */
+%type <mnString> type
+%type <mnString> const_val
 %token CONTINUE BREAK DO ELSE ENUM EXTERN FOR FN IF IN  LET LOOP MATCH MUT PRINT PRINTLN PUB RETURN SELF STATIC USE WHERE WHILE
 %token INT STRUCT BOOL FLOAT CHAR STR
 %token RIGHT_BRACE LEFT_BRACE RIGHT_BRACK LEFT_BRACK RIGHT_PARENT LEFT_PARENT COMMA COLON SEMICOLON            
 %token DIVIDE MUTI MINUS PLUS MOD MMINUS ADD NOTEQ LARGEREQ LESSEQ LARGER LESS EQ
 %token LOGICAL_AND LOGICAL_OR LOGICAL_NOT ASSIGN DIVIDE_ASSIGN PLUS_ASSIGN MINUS_ASSIGN TIMES_ASSIGN
-%token REALCONSTANT INTCONSTANT STRINGCONSTANT
+//%token REALCONSTANT INTCONSTANT STRINGCONSTANT
  
 %token<mnString> IDENTIFIER
-%token<mnInt> INTEGER
-%token<mnFloat> REAL
+%token<mnString> INTEGER
+%token<mnString> REAL
 %token<mnString> STRING
 %token<mnString> TRUE
 %token<mnString> FALSE
 
 
-%type <mnString> type
-%type <mnString> const_val
+
 //%token<vinfo> exp number int_exp bool_exp num_exp func_exp array_exp constant variable constant_exp declaration simple
 
 %start program
@@ -99,54 +100,120 @@ var_declared:
 		
 const_declared:
 		LET IDENTIFIER ASSIGN const_val{
-			Trace("Reducing to const declared");
-			int temp = -1;
-			temp = NodeSearch(,$2)
-			if(temp == 1){
+			Trace("Reducing to const declared\n");
+			if(NodeSearch(Top(SymbolTable)->Table,$2)==NULL){
 				Node *nNode = NodeCreate($2);
 				if(typeVal == 0){
-					int *val = (int*)malloc(sizeof(int));
-					*val = atoi($4);
-					void *value = (void*)val;
-					nNode->vartype = "const_int";
+					int *temp = (int*)malloc(sizeof(int));
+					*temp = atoi($4);
+					void *val = (void*)temp;
+					nNode->type = "const_int";
 					nNode->value = val;
-					typeVal = 5;
-					NodeInsert(,nNode);//not finish
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
 				}
 				else if(typeVal == 1){
-					float *val = (float*)malloc(sizeof(float));
-					*val = atof($4);
-					void *value = (void*)val;
-					nNode->vartype = "const_float";
+					float *temp = (float*)malloc(sizeof(float));
+					*temp = atof($4);
+					void *val = (void*)temp;
+					nNode->type = "cnost_float";
 					nNode->value = val;
-					typeVal = 5;
-					NodeInsert(,nNode);//not finish
-				}
-				else if(typeVal == 2){
-					char *val = (char*)malloc(sizeof(char));
-					strcpy(val,$4);
-					void *value = (void*)val;
-					nNode->vartype = "const_bool";
-					nNode->value = val;
-					typeVal = 5;
-					NodeInsert(,nNode);//not finish
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
 				}
 				else if(typeVal == 3){
-					char *val = (char*)malloc(sizeof(char));
-					strcpy(val,$4);
-					void *value = (void*)val;
-					nNode->vartype = "const_string";
+					char *temp = strdup($4);
+					void *val = (void*)temp;
+					nNode->type = "const_bool";
 					nNode->value = val;
-					typeVal = 5;
-					NodeInsert(,nNode);//not finish
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
 				}
+				else if(typeVal == 2){
+					char *temp = strdup($4);
+					void *val = (void*)temp;
+					nNode->type = "const_string";
+					nNode->value = val;
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else{
+					printf("type val out of range\n");
+					typeVal = 4;
+				}
+				dump(Top(SymbolTable)->Table);
 			}
-			else if(temp == 0){
-				print("Identifier %s existed",$2);
+			else{
+				printf("Identifier %s existed\n",$2);
 			}
 		} |
 		LET IDENTIFIER COLON type ASSIGN const_val{
-			Trace("Reducing to const declared");	
+			Trace("Reducing to const declared\n");
+			if(NodeSearch(Top(SymbolTable)->Table,$2)==NULL){
+				Node *nNode = NodeCreate($2);
+				if(typeVal == 0){
+				  if(strcmp("int",$4)!=0){
+					printf("error type %d is not %s type\n",atoi($6),$4);
+				   }
+			 	  else{
+					int *temp = (int*)malloc(sizeof(int));
+					*temp = atoi($6);
+					void *val = (void*)temp;
+					nNode->type = "int";
+					nNode->value = val;
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);
+				   }
+				 }
+				 else if(typeVal == 1){
+				   if(strcmp("float",$4)!=0){
+					printf("error type %f is not %s type\n",atof($6),$4);
+				   }
+			 	   else{
+					float *temp = (float*)malloc(sizeof(float));
+					*temp = atoi($6);
+					void *val = (void*)temp;
+					nNode->type = "float";
+					nNode->value = val;
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);
+				    }
+				  }
+				else if(typeVal == 2){
+				   if(strcmp("str",$4)!=0){
+					printf("error type %d is not %s type\n",atoi($6),$4);
+				   }
+			 	   else{
+					char *temp = strdup($6);
+					void *val = (void*)temp;
+					nNode->type = "string";
+					nNode->value = val;
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);
+				    }
+				 }
+				else if(typeVal == 3){
+				  if(strcmp("bool",$4)!=0){
+					printf("error type %d is not %s type\n",atoi($6),$4);
+				   }
+			 	  else{
+					char *temp =strdup($6);
+					void *val = (void*)temp;
+					nNode->type = "bool";
+					nNode->value = val;
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);
+				    }
+				}
+				else{
+					printf("type val out of range\n");
+					typeVal = 4;				
+				}
+				dump(Top(SymbolTable)->Table);
+			}
+			else{
+				printf("Identifier %s existed\n",$2);
+			}	
 		}
 		;
 arr_declared:
@@ -210,17 +277,33 @@ bool_exp:
 		FALSE
 		;
 const_val:
-		NUMBER{$$ = $1; typeVal = 0;} |
-		REAL{$$ = $1;typeVal = 1;} |
-		TRUE{$$ = $1;typeVal = 2;} |
-		FALSE{$$ = $1;typeVal = 2;} |
-		STRING{$$ = $1;typeVal = 3;}
+		INTEGER{
+			$$ = $1; 
+			typeVal = 0;
+		} |
+		REAL{
+			$$ = $1;
+			typeVal = 1;
+		} |
+		TRUE{
+			$$ = $1;
+			typeVal = 3;
+		} |
+		FALSE{
+			$$ = $1;
+			typeVal = 3;
+		} |
+		STRING{
+			$$ = $1;
+			typeVal = 2;
+			Trace("Reducing to value string\n");
+		}
 		;
 type:		
-		BOOL{$$ = "bool"} |
-		INT{$$ = "int"} |
-		STR{$$ = "string"} |
-		FLOAT{$$ = "float"}
+		BOOL{$$ = "bool";typeVal = 3;} |
+		INT{$$ = "int";typeVal = 0;} |
+		STR{$$ = "string";typeVal = 2;Trace("Reducing to type string\n");} |
+		FLOAT{$$ = "float";typeVal = 1;}
 		;
 
 /*program:        identifier semi
@@ -244,6 +327,7 @@ char *msg;
     fprintf(stderr, "%s\n", msg);
 }
 int typeVal = 4;
+allSymTab *SymbolTable = NULL;
 main(int argc,char **argv)
 {
     /* open the source program file */
@@ -253,6 +337,7 @@ main(int argc,char **argv)
     }
     yyin = fopen(argv[1], "r");         /* open input file */
 
+    SymbolTable = CreateSt();
     /* perform parsing */
     if (yyparse() == 1)                 /* parsing */
         yyerror("Parsing error !");     /* syntax error */

@@ -1,37 +1,41 @@
 #include<stdio.h>
 #include<stdlib.h>
-#include<string.h>
 #include"symbols.h"
 
 
 
 Node* NodeCreate(char *id){
-	Node* nNode = (Node*)malloc(sizeof(Node));
-	if(nNode!=NULL){
-		nNode->name =(char*)malloc(sizeof(char)*(strlen(id)+1));
-		nNode->vartype=NULL;
+	/*Node* nNode = (Node*)malloc(sizeof(Node));*/
+	//if(nNode!=NULL){
+		Node *nNode = NULL;
+		nNode = (Node*)malloc(sizeof(Node));
+		nNode->name = id;
+		nNode->type=NULL;
 		nNode->value=NULL;
 		nNode->next = NULL;
-		strcpy(nNode->name,id);
 		return nNode;
-	}
+	//}
 }
-int NodeSearch(Node* list,char* newID){
-	Node* iter = list;
-	int temp;
-	while(iter!=NULL){
-		temp = strcmp(list->name,newID);
-		if(temp==0){
-			return 0;
-		}
-		iter = (Node *)iter->next;
+Node* NodeSearch(Node* list,char *newID){
+	Node *currentlist = list;
+	if(currentlist->name==NULL){
+		return NULL;
 	}
-	return 1;
+	while(currentlist->next!=NULL){
+		if(strcmp(currentlist->name,newID)==0){
+			return currentlist;
+		}
+		currentlist = currentlist->next;
+	}
+	if(strcmp(currentlist->name,newID)==0){
+		return currentlist;
+	}
+	return NULL;
 }
 int NodeInsert(Node* list,Node* nNode){
 	int temp=0;
 	Node *allNode = list;
-	temp = NodeSearch(list,nNode);
+	/*temp = NodeSearch(list,nNode);
 	if(temp==1){
 		Node *newNode =NodeCreate(nNode);
 		while(allNode->next!=NULL){
@@ -41,21 +45,36 @@ int NodeInsert(Node* list,Node* nNode){
 	}
 	else
 		return 0;
-	return 0;
+	return 0;*/
+	if(allNode->name==NULL && allNode->next == NULL){
+		allNode->name = nNode->name;
+		allNode->type = nNode->type;
+		allNode->value = nNode->value;
+		allNode->next = nNode->next;
+		return 0;
+	}
+	while(allNode->next!=NULL){
+		allNode= allNode->next;
+		temp+=1;
+	}
+	allNode->next=nNode;
+	return temp;
 }
-int dump(Node* list){
+void dump(Node* list){
 	Node *allNode = list;
 	printf("\nSymbol table:\n");
 	while(allNode->next!=NULL){
-		printval(allNode);
+		tablePrint(allNode);
 		allNode=allNode->next;
 	}
-	printval(allNode);
+	tablePrint(allNode);
 	printf("\n");
 }
 
-
-void printval(Node *nowID){
+Node* Create(){
+	return(Node*)malloc(sizeof(Node));
+}
+void tablePrint(Node *nowID){
   if(nowID->type == NULL){
     printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
   }
@@ -66,21 +85,21 @@ void printval(Node *nowID){
     }
     printf("%s\t%s\t%d\n", nowID->name, nowID->type, *((int*)nowID->value));
   }
-  else if(strcmp(nowID->type, "nint") == 0){
+  else if(strcmp(nowID->type, "const_int") == 0){
     if(nowID->value == NULL){
       printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
       return;
     }
     printf("%s\t%s\t%d\n", nowID->name, NULL, *((int*)nowID->value));
   }
-  else if(strcmp(nowID->type, "str") == 0){
+  else if(strcmp(nowID->type, "string") == 0){
     if(nowID->value == NULL){
       printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
       return;
     }
     printf("%s\t%s\t%s\n", nowID->name, nowID->type, (char*)nowID->value);
   }
-  else if(strcmp(nowID->type, "nstr") == 0){
+  else if(strcmp(nowID->type, "const_string") == 0){
     if(nowID->value == NULL){
       printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
       return;
@@ -94,7 +113,7 @@ void printval(Node *nowID){
     }
     printf("%s\t%s\t%2f\n", nowID->name, nowID->type, *((float*)nowID->value));
   }
-  else if(strcmp(nowID->type, "nfloat") == 0){
+  else if(strcmp(nowID->type, "const_float") == 0){
     if(nowID->value == NULL){
       printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
       return;
@@ -108,7 +127,7 @@ void printval(Node *nowID){
     }
     printf("%s\t%s\t%s\n", nowID->name, nowID->type, (char*)nowID->value);
   }
-  else if(strcmp(nowID->type, "nbool") == 0){
+  else if(strcmp(nowID->type, "const_bool") == 0){
     if(nowID->value == NULL){
       printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
       return;
@@ -132,3 +151,19 @@ void printval(Node *nowID){
   }
 }
 
+allSymTab* CreateSt(){
+	allSymTab* newStack = (allSymTab*)malloc(sizeof(allSymTab));
+	newStack->Table = Create();
+	newStack->next = NULL;
+	return newStack;
+}
+allSymTab* Top(allSymTab* stack){
+	allSymTab *nowStack = stack;
+	while(nowStack->next != NULL){
+		nowStack = nowStack->next;
+	}
+	if(nowStack->Table!=NULL){
+		return nowStack;
+	}
+	return NULL;
+}

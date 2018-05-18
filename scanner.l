@@ -76,7 +76,7 @@ do	{token(DO);}
 else	{token(ELSE);}
 enum	{token(ENUM);}     
 extern	{token(EXTERN);}
-false	{token(FALSE);}
+false	{yylval.mnString = yytext;token(FALSE);}
 float	{token(FLOAT);}
 for	{token(FOR);}
 fn	{token(FN);}
@@ -94,25 +94,25 @@ self	{token(SELF);}
 static	{token(STATIC);}
 str	{token(STR);}
 struct	{token(STRUCT);}
-true	{token(TRUE);}
+true	{yylval.mnString = yytext;token(TRUE);}
 use	{token(USE);}
 where	{token(WHERE);}
 while	{token(WHILE);}
 {ident}	{
 	tokenString(yytext);
 	yylval.mnString = strdup(yytext);
-	return IDENTIFIER;
+	return(IDENTIFIER);
 }
 
 {Integer}	{
 	tokenInteger(atoi(yytext));
-	yylval.mnInt = atoi(yytext);
-	return INTEGER;
+	yylval.mnString = yytext;
+	return(INTEGER);
 }
 {Float}	{
 	tokenFloat(atof(yytext));
-	yylval.mnFloat =atof(yytext);
-	return REAL;
+	yylval.mnString =yytext;
+	return(REAL);
 }
 
 "//"	{LIST;BEGIN COMMENT1;}
@@ -139,7 +139,7 @@ while	{token(WHILE);}
 
 "\""	{LIST;BEGIN COMMENT3;}
 <COMMENT3>[ \t]	{LIST;strcat(sbuf,yytext);}
-<COMMENT3>"\""	{LIST;tokenStrings(sbuf);memset(sbuf ,'\0',MAX_LINE_LENG);return STRING;BEGIN 0;}
+<COMMENT3>"\""	{LIST;tokenStrings(sbuf);yytext = strdup(sbuf);yylval.mnString = yytext;return(STRING);memset(sbuf ,'\0',MAX_LINE_LENG);BEGIN 0;}
 <COMMENT3>.	{LIST;strcat(sbuf,yytext);}
 
 [ \t]	{LIST;}
