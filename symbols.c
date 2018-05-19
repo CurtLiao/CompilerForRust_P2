@@ -49,6 +49,7 @@ int NodeInsert(Node* list,Node* nNode){
 		allNode->name = nNode->name;
 		allNode->type = nNode->type;
 		allNode->value = nNode->value;
+		allNode->conOrvar = nNode->conOrvar;
 		allNode->next = nNode->next;
 		return 0;
 	}
@@ -62,6 +63,7 @@ int NodeInsert(Node* list,Node* nNode){
 void dump(Node* list){
 	Node *allNode = list;
 	printf("\nSymbol table:\n");
+	printf("name\ttype\tvalue\tconst_or_variable\n");
 	while(allNode->next!=NULL){
 		tablePrint(allNode);
 		allNode=allNode->next;
@@ -75,63 +77,67 @@ Node* Create(){
 }
 void tablePrint(Node *nowID){
   if(nowID->type == NULL){
-    printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
+	if(nowID->value ==NULL){
+		printf("%s\t%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value,nowID->conOrvar);
+		return;
+	}
+    printf("%s\t%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value,nowID->conOrvar);
   }
   else if(strcmp(nowID->type, "int") == 0){
     if(nowID->value == NULL){
-      printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
+      printf("%s\t%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value,nowID->conOrvar);
       return;
     }
-    printf("%s\t%s\t%d\n", nowID->name, nowID->type, *((int*)nowID->value));
+    printf("%s\t%s\t%d%s\n", nowID->name, nowID->type, *((int*)nowID->value),nowID->conOrvar);
   }
   else if(strcmp(nowID->type, "const_int") == 0){
     if(nowID->value == NULL){
-      printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
+      printf("%s\t%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value,nowID->conOrvar);
       return;
     }
-    printf("%s\t%s\t%d\n", nowID->name, NULL, *((int*)nowID->value));
+    printf("%s\t%s\t%d%s\n", nowID->name, NULL, *((int*)nowID->value),nowID->conOrvar);
   }
   else if(strcmp(nowID->type, "string") == 0){
     if(nowID->value == NULL){
-      printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
+      printf("%s\t%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value,nowID->conOrvar);
       return;
     }
-    printf("%s\t%s\t%s\n", nowID->name, nowID->type, (char*)nowID->value);
+    printf("%s\t%s\t%s\t%s\n", nowID->name, nowID->type, (char*)nowID->value,nowID->conOrvar);
   }
   else if(strcmp(nowID->type, "const_string") == 0){
     if(nowID->value == NULL){
-      printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
+      printf("%s\t%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value,nowID->conOrvar);
       return;
     }
-    printf("%s\t%s\t%s\n", nowID->name, NULL, (char*)nowID->value);
+    printf("%s\t%s\t%s\t%s\n", nowID->name, NULL, (char*)nowID->value,nowID->conOrvar);
   }
   else if(strcmp(nowID->type, "float") == 0){
     if(nowID->value == NULL){
-      printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
+      printf("%s\t%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value,nowID->conOrvar);
       return;
     }
-    printf("%s\t%s\t%2f\n", nowID->name, nowID->type, *((float*)nowID->value));
+    printf("%s\t%s\t%2f\t%s\n", nowID->name, nowID->type, *((float*)nowID->value),nowID->conOrvar);
   }
   else if(strcmp(nowID->type, "const_float") == 0){
     if(nowID->value == NULL){
-      printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
+      printf("%s\t%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value,nowID->conOrvar);
       return;
     }
-    printf("%s\t%s\t%2f\n", nowID->name, NULL, *((float*)nowID->value));
+    printf("%s\t%s\t%2f\t%s\n", nowID->name, NULL, *((float*)nowID->value),nowID->conOrvar);
   }
   else if(strcmp(nowID->type, "bool") == 0){
     if(nowID->value == NULL){
-      printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
+      printf("%s\t%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value,nowID->conOrvar);
       return;
     }
-    printf("%s\t%s\t%s\n", nowID->name, nowID->type, (char*)nowID->value);
+    printf("%s\t%s\t%s\t%s\n", nowID->name, nowID->type, (char*)nowID->value,nowID->conOrvar);
   }
   else if(strcmp(nowID->type, "const_bool") == 0){
     if(nowID->value == NULL){
-      printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
+      printf("%s\t%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value,nowID->conOrvar);
       return;
     }
-    printf("%s\t%s\t%s\n", nowID->name, NULL, (char*)nowID->value);
+    printf("%s\t%s\t%s\t%s\n", nowID->name, NULL, (char*)nowID->value,nowID->conOrvar);
   }
   else if(strcmp(nowID->type, "int_array") == 0){
     printf("%s\t%s\t%d\n", nowID->name, nowID->type, *(int*)nowID->value);

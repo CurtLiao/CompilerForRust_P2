@@ -1,0 +1,6 @@
+let mut a;
+//let c =true;
+let mut s = "Hey There";
+//let i = -25;
+let f:float = 3.14;
+let mut b=true;

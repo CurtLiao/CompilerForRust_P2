@@ -89,15 +89,163 @@ formal_argu:
 //ID DEFINE
 var_declared:
 		LET MUT IDENTIFIER{
+			if(NodeSearch(Top(SymbolTable)->Table,$3)==NULL){
+				
+				Node *nNode = NodeCreate($3);
+				nNode->conOrvar = "variable";
+				
+				//printf("%s\t%s\t%s\t%s\n", nNode->name, nNode->type, nNode->value,nNode->conOrvar);
+				typeVal = 4;
+				NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				dump(Top(SymbolTable)->Table);
+			}
+			else{
+				printf("Identifier %s existed\n",$3);
+			}
 			Trace("Reducing to var_declared no type&value\n");
 		} |
 		LET MUT IDENTIFIER COLON type{
+			if(NodeSearch(Top(SymbolTable)->Table,$3)==NULL){
+				Node *nNode = NodeCreate($3);
+				if(typeVal == 0){
+					nNode->type = "int";
+					nNode->conOrvar = "variable";
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else if(typeVal == 1){
+					nNode->type = "float";
+					nNode->conOrvar = "variable";
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else if(typeVal == 3){
+					nNode->type = "bool";
+					nNode->conOrvar = "variable";
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else if(typeVal == 2){
+					nNode->type = "string";
+					nNode->conOrvar = "variable";
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else{
+					printf("type val out of range\n");
+					typeVal = 4;
+				}
+				dump(Top(SymbolTable)->Table);
+			}
+			else{
+				printf("Identifier %s existed\n",$3);
+			}
 			Trace("Reducing to var_declared no value\n");
 		} |
 		LET MUT IDENTIFIER ASSIGN const_val{
+			if(NodeSearch(Top(SymbolTable)->Table,$3)==NULL){
+				Node *nNode = NodeCreate($3);
+				if(typeVal == 0){
+					int *temp = (int*)malloc(sizeof(int));
+					*temp = atoi($5);
+					void *val = (void*)temp;
+					nNode->type = "int";
+					nNode->value = val;
+					nNode->conOrvar = "variable";
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else if(typeVal == 1){
+					float *temp = (float*)malloc(sizeof(float));
+					*temp = atof($5);
+					void *val = (void*)temp;
+					nNode->type = "float";
+					nNode->value = val;
+					nNode->conOrvar = "variable";
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else if(typeVal == 3){
+					char *temp = strdup($5);
+					void *val = (void*)temp;
+					nNode->type = "bool";
+					nNode->value = val;
+					nNode->conOrvar = "variable";
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else if(typeVal == 2){
+					
+					char *temp = strdup($5);
+					void *val = (void*)temp;
+					nNode->type = "string";
+					nNode->value = val;
+					nNode->conOrvar = "variable";
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else{
+					printf("type val out of range\n");
+					typeVal = 4;
+				}
+				dump(Top(SymbolTable)->Table);
+			}
+			else{
+				printf("Identifier %s existed\n",$3);
+			}
 			Trace("Reducing to var_declared no type\n");
 		} |
 		LET MUT IDENTIFIER COLON type ASSIGN const_val{
+			if(NodeSearch(Top(SymbolTable)->Table,$3)==NULL){
+				Node *nNode = NodeCreate($3);
+				if(typeVal == 0){
+					int *temp = (int*)malloc(sizeof(int));
+					*temp = atoi($7);
+					void *val = (void*)temp;
+					nNode->type = "int";
+					nNode->value = val;
+					nNode->conOrvar = "variable";
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else if(typeVal == 1){
+					float *temp = (float*)malloc(sizeof(float));
+					*temp = atof($7);
+					void *val = (void*)temp;
+					nNode->type = "float";
+					nNode->value = val;
+					nNode->conOrvar = "variable";
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else if(typeVal == 3){
+					char *temp = strdup($7);
+					void *val = (void*)temp;
+					nNode->type = "bool";
+					nNode->value = val;
+					nNode->conOrvar = "variable";
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else if(typeVal == 2){
+					
+					char *temp = strdup($7);
+					void *val = (void*)temp;
+					nNode->type = "string";
+					nNode->value = val;
+					nNode->conOrvar = "variable";
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else{
+					printf("type val out of range\n");
+					typeVal = 4;
+				}
+				dump(Top(SymbolTable)->Table);
+			}
+			else{
+				printf("Identifier %s existed\n",$3);
+			}
 			Trace("Reducing to var_declared\n");
 		}
 		;
@@ -112,6 +260,7 @@ const_declared:
 					void *val = (void*)temp;
 					nNode->type = "const_int";
 					nNode->value = val;
+					nNode->conOrvar = "constant";
 					typeVal = 4;
 					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
 				}
@@ -121,6 +270,7 @@ const_declared:
 					void *val = (void*)temp;
 					nNode->type = "cnost_float";
 					nNode->value = val;
+					nNode->conOrvar = "constant";
 					typeVal = 4;
 					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
 				}
@@ -129,6 +279,7 @@ const_declared:
 					void *val = (void*)temp;
 					nNode->type = "const_bool";
 					nNode->value = val;
+					nNode->conOrvar = "constant";
 					typeVal = 4;
 					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
 				}
@@ -138,6 +289,7 @@ const_declared:
 					void *val = (void*)temp;
 					nNode->type = "const_string";
 					nNode->value = val;
+					nNode->conOrvar = "constant";
 					typeVal = 4;
 					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
 				}
@@ -150,10 +302,10 @@ const_declared:
 			else{
 				printf("Identifier %s existed\n",$2);
 			}
-			Trace("Reducing to const declareda\n");
+			Trace("Reducing to const declared\n");
 		} |
 		LET IDENTIFIER COLON type ASSIGN const_val{
-			Trace("Reducing to const declaredA\n");
+			
 			if(NodeSearch(Top(SymbolTable)->Table,$2)==NULL){
 				Node *nNode = NodeCreate($2);
 				if(typeVal == 0){
@@ -166,6 +318,7 @@ const_declared:
 					void *val = (void*)temp;
 					nNode->type = "int";
 					nNode->value = val;
+					nNode->conOrvar = "constant";
 					typeVal = 4;
 					NodeInsert(Top(SymbolTable)->Table,nNode);
 				   }
@@ -180,6 +333,7 @@ const_declared:
 					void *val = (void*)temp;
 					nNode->type = "float";
 					nNode->value = val;
+					nNode->conOrvar = "constant";
 					typeVal = 4;
 					NodeInsert(Top(SymbolTable)->Table,nNode);
 				    }
@@ -193,6 +347,7 @@ const_declared:
 					void *val = (void*)temp;
 					nNode->type = "string";
 					nNode->value = val;
+					nNode->conOrvar = "constant";
 					typeVal = 4;
 					NodeInsert(Top(SymbolTable)->Table,nNode);
 				    }
@@ -206,6 +361,7 @@ const_declared:
 					void *val = (void*)temp;
 					nNode->type = "bool";
 					nNode->value = val;
+					nNode->conOrvar = "constant";
 					typeVal = 4;
 					NodeInsert(Top(SymbolTable)->Table,nNode);
 				    }
@@ -218,7 +374,8 @@ const_declared:
 			}
 			else{
 				printf("Identifier %s existed\n",$2);
-			}	
+			}
+			Trace("Reducing to const declared\n");	
 		}
 		;
 arr_declared:

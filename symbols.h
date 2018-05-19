@@ -5,6 +5,7 @@ typedef struct Nodes{
 	char *name;
 	int type;
 	void *value;
+	char *conOrvar;
 	struct Nodes *next;
 }Node;
 typedef struct symtab{

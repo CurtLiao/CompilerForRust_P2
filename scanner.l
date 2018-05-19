@@ -19,6 +19,7 @@ int j =0;
 char buf[MAX_LINE_LENG];
 char sbuf[MAX_LINE_LENG];
 char *abuf;
+char result[MAX_LINE_LENG]; 
 %}
 
 digit	[0-9_]+
@@ -136,37 +137,11 @@ while	{token(WHILE);}
 	buf[0] = '\0';
 }
 <COMMENT2>"*/"	{LIST;BEGIN 0;}
+"\""	{LIST;BEGIN COMMENT3;}
+<COMMENT3>[ \t]	{LIST;strcat(sbuf,yytext);}
+<COMMENT3>"\""	{LIST;yytext = strdup(sbuf);yylval.mnString = yytext;memset(sbuf ,'\0',MAX_LINE_LENG);BEGIN 0;return(STRING);}
+<COMMENT3>.	{LIST;strcat(sbuf,yytext);}
 
-"\"" {
-      char *result = malloc(MAX_LINE_LENG);
-      strcat(buf, "\"");
-      memset(strbuf, '\0', MAX_LINE_LENG);
-      memset(result, '\0', MAX_LINE_LENG);
-      int i = 0;
-      while(c = input()){
-	if(c == '\"'){
-	  c = input();
-          if (c != '\"'){
-	    unput(c);
-	    strcat(buf, strbuf);
-	    strcat(result, strbuf);
-	    break;
-          }
-          strcat(buf, strbuf);
-	  strcat(buf, "\"");
-	  strcat(result, strbuf);
-	  memset(strbuf, '\0', MAX_LINE_LENG);
-          i = 0;
-        }
-        strbuf[i] = c;
-	i++;
-      }
-      yytext = strdup(result);
-      strcat(buf, "\"");
-      //tokenString("string", "");
-      yylval.mnString = yytext;
-      return(STRING);
-    }
 
 [ \t]	{LIST;}
 \n      {
