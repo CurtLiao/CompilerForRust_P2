@@ -1,0 +1,10 @@
+fn main(){
+	let mut a=5;
+	let s = "Hey there";
+	let mut d:bool;
+	let mut w:bool = false;
+	a= 5 + 5;
+	print a;
+	println 5 + 1;
+	print 7;
+}

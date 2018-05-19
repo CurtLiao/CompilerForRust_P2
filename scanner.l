@@ -108,6 +108,7 @@ while	{token(WHILE);}
 {Integer}	{
 	tokenInteger(atoi(yytext));
 	yylval.mnString = yytext;
+	
 	return(INTEGER);
 }
 {Float}	{

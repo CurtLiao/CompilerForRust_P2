@@ -1,6 +1,6 @@
 %{  
 #define Trace(t)        printf(t)
-#include<stdio.h>
+
 %}
 
 %union
@@ -13,7 +13,7 @@
 
 /* tokens */
 %type <mnString> type
-%type <mnString> const_val
+%type <mnString> const_val exp num_exp num_exp_arg bool_exp
 %token CONTINUE BREAK DO ELSE ENUM EXTERN FOR FN IF IN  LET LOOP MATCH MUT PRINT PRINTLN PUB RETURN SELF STATIC USE WHERE WHILE
 %token STRUCT CHAR  
 %token RIGHT_BRACE LEFT_BRACE RIGHT_BRACK LEFT_BRACK RIGHT_PARENT LEFT_PARENT COMMA COLON SEMICOLON            
@@ -72,17 +72,71 @@ normal_declared:
 		normal_declared arr_declared SEMICOLON{Trace("Reducing to normal5\n");} |
 		arr_declared SEMICOLON{Trace("Reducing to normal6\n");}
 		;
-		
-//FUNCTION DEFINE
 func_declared:
-		FN IDENTIFIER LEFT_PARENT formal_argu RIGHT_PARENT MINUS LARGER type block{Trace("Reducing to func_declared\n");} |
-		FN IDENTIFIER LEFT_PARENT RIGHT_PARENT MINUS LARGER type block{Trace("Reducing to func_declared no formal argumen\nt");} |
-		FN IDENTIFIER LEFT_PARENT formal_argu RIGHT_PARENT block{Trace("Reducing to func_declared no type\n");} |
-		FN IDENTIFIER LEFT_PARENT RIGHT_PARENT block{Trace("Reducing to func_declared with nothing\n");} |
+		func_declared func_declars |
+		func_declars
+		;
+func_declars:
+		FN IDENTIFIER LEFT_PARENT func_argu RIGHT_PARENT MINUS LARGER type block{
+			Trace("Reducing to func_declared\n");
+			Node *nNode = NodeSearch(Top(SymbolTable)->Table,$2);
+			if(nNode==NULL){
+				nNode = NodeCreate($2);
+				nNode->type="func_";
+				strcat(nNode->type,$8);
+				NodeInsert(Top(SymbolTable)->Table,nNode);
+				dump(Top(SymbolTable)->Table);
+			}
+			else{
+				printf("%s existed\n",$2);
+			}
+		} |
+		FN IDENTIFIER LEFT_PARENT RIGHT_PARENT MINUS LARGER type block{
+			Trace("Reducing to func_declared no func argument\n");
+			Node *nNode = NodeSearch(Top(SymbolTable)->Table,$2);
+			if(nNode==NULL){
+				nNode = NodeCreate($2);
+				nNode->type="func_";
+				strcat(nNode->type,$7);
+				NodeInsert(Top(SymbolTable)->Table,nNode);
+				dump(Top(SymbolTable)->Table);
+			}
+			else{
+				printf("%s existed\n",$2);
+			}
+		} |
+		FN IDENTIFIER LEFT_PARENT func_argu RIGHT_PARENT block{
+			Trace("Reducing to func_declared no type\n");
+			Node *nNode = NodeSearch(Top(SymbolTable)->Table,$2);
+			if(nNode==NULL){
+				nNode = NodeCreate($2);
+				nNode->type="func";
+				
+				NodeInsert(Top(SymbolTable)->Table,nNode);
+				dump(Top(SymbolTable)->Table);
+			}
+			else{
+				printf("%s existed\n",$2);
+			}
+		} |
+		FN IDENTIFIER LEFT_PARENT RIGHT_PARENT block{
+			Trace("Reducing to func_declared with nothing\n");
+			Node *nNode = NodeSearch(Top(SymbolTable)->Table,$2);
+			if(nNode==NULL){
+				nNode = NodeCreate($2);
+				nNode->type="func";
+				
+				NodeInsert(Top(SymbolTable)->Table,nNode);
+				dump(Top(SymbolTable)->Table);
+			}
+			else{
+				printf("%s existed\n",$2);
+			}
+		}
 		;
 
-formal_argu:
-		formal_argu IDENTIFIER COLON type |
+func_argu:
+		func_argu COMMA IDENTIFIER COLON type |
 		IDENTIFIER COLON type
 		;
 
@@ -379,61 +433,236 @@ const_declared:
 		}
 		;
 arr_declared:
-		LET MUT IDENTIFIER LEFT_BRACK type COMMA num_exp RIGHT_BRACK SEMICOLON{Trace("Reducing to arr_declared\n");}
+		LET MUT IDENTIFIER LEFT_BRACK type COMMA num_exp RIGHT_BRACK{
+			Trace("Reducing to arr_declared\n");
+			Node *nNode = NodeSearch(Top(SymbolTable)->Table,$3);
+			int ex=1;
+			if(nNode==NULL){
+				nNode=NodeCreate($3);
+				ex=0;
+			}
+			int *temp = *(int*)malloc(sizeof(int));
+			*temp = atoi($7);
+			void *val = (void*)temp;
+			char *st = strdup($5);
+			strcat(st,"_array");
+			nNode->type=st;
+			nNode->value=val;
+			if(ex==0){
+				NodeInsert(Top(SymbolTable)->Table,nNode);
+			}
+			dump(Top(SymbolTable)->Table);
+		}
 		;
 simple:		
-		IDENTIFIER ASSIGN bool_exp{Trace("Reducing to simple\n");}|
-		PRINT exp{Trace("Reducing to simple\n");} |
-		PRINTLN exp{Trace("Reducing to simple\n");} |
+		IDENTIFIER ASSIGN exp{
+			Trace("Reducing to simple statement\n");
+		  	Node *nNode = NodeSearch(Top(SymbolTable)->Table, $1);
+		  	if(nNode == NULL){
+		    printf("Error: Undefined variable\n");
+		  }
+		  else{
+		    switch(typeVal){
+		      case 0:
+		        if(strcmp("int", nNode->type) == 0 || strcmp("const_int", nNode->type) == 0){
+					int* temp = (int*)malloc(sizeof(int));
+					*temp = atoi($3);
+					nNode->value = (void*)temp;
+					printf("%s's value = %d\n", nNode->name, *(int*)nNode->value);
+				}
+				else{
+			  		printf("Error: Unsuitable type\n");
+				}
+		        break;
+		      case 1:
+		        if(strcmp("float", nNode->type) == 0 || strcmp("const_float", nNode->type) == 0){
+					float* temp = (float*)malloc(sizeof(float));
+					*temp = atof($3);
+					nNode->value = (void*)temp;
+				}
+				else{
+			  		printf("Error: Unsuitable type\n");
+				}
+		        break;
+		      case 2:
+		        if(strcmp("string", nNode->type) == 0 || strcmp("const_string", nNode->type) == 0){
+			  		nNode->value = (void*)$3;
+				}
+				else{
+			  		printf("Error: Unsuitable type\n");
+				}
+		        break;
+		      case 3:
+		        if(strcmp("bool", nNode->type) == 0 || strcmp("cnost_bool", nNode->type) == 0){
+			  		nNode->value = (void*)$3;
+				}
+				else{
+			  		printf("Error: Unsuitable type\n");
+				}
+		    	break;
+		      default:
+		        break;
+		    }
+		  }
+		} |
+		PRINT exp{
+			Trace("Reducing to simple\n");
+			if(typeVal==0){
+				printf("%d\n",atoi($2));
+			}
+			else if(typeVal==1){
+				printf("%f",atof($2));
+			}
+			else{
+				printf("%s",$2);
+			}
+		} |
+		PRINTLN exp{
+			Trace("Reducing to simple\n");
+			if(typeVal==0){
+				printf("%d\n",atoi($2));
+			}
+			else if(typeVal==1){
+				printf("%f\n",atof($2));
+			}
+			else{
+				printf("%s\n",$2);
+			}
+		} |
 		RETURN{Trace("Reducing to simple\n");} |
 		RETURN exp{Trace("Reducing to simple\n");}
 		;
-block:		LEFT_BRACE statement RIGHT_BRACE |
-		LEFT_BRACE id_declared statement RIGHT_BRACE
+block:		
+		LEFT_BRACE normal_declared statement RIGHT_BRACE |
+		LEFT_BRACE statement RIGHT_BRACE
 		;
 func_invoke:
-		IDENTIFIER LEFT_PARENT func_invoke_argu RIGHT_PARENT{Trace("Reducing to function invoke\n");}	
+		IDENTIFIER LEFT_PARENT func_invoke_argu RIGHT_PARENT{
+			Trace("Reducing to function invoke\n");
+		}	
 		;
 func_invoke_argu:
 		func_invoke_argu COMMA exp |
 		exp
 		;
 condition:	
-		IF LEFT_PARENT bool_exp RIGHT_PARENT block ELSE block |
-		IF LEFT_PARENT bool_exp RIGHT_PARENT block
+		IF LEFT_PARENT bool_exp RIGHT_PARENT block ELSE block{Trace("Reducing to condition");} |
+		IF LEFT_PARENT bool_exp RIGHT_PARENT block{Trace("Reducing to condition");}
 		;
 loop:		
 		WHILE LEFT_PARENT bool_exp RIGHT_PARENT block
 		;
 
 exp:		
-		exp LESS exp |
-		exp LARGER exp |
-		exp EQ exp |
-		exp LESSEQ exp |
-		exp LARGEREQ exp |
-		exp NOTEQ exp |
-		MINUS exp %prec UMINUS |
-		bool_exp |
-		num_exp |
-		func_invoke |
-		IDENTIFIER 
+		bool_exp{
+			Trace("Reducing to exp\n");
+			$$=$1;
+		} |
+		num_exp{
+			Trace("Reducing to expression\n");
+		  	$$ = $1;
+		} |
+		func_invoke{
+			Trace("Reducing to exp\n");
+		} |
+		IDENTIFIER{
+			Trace("Reducing to exp\n");
+			Node *nNode = NodeSearch(Top(SymbolTable)->Table,$1);
+			if(nNode==NULL){
+				printf("Undefined variable\n");
+			}
+			else{
+				if(strcmp(nNode->type,"int")==0 ||strcmp(nNode->type,"const_int")==0){
+					sprintf($$,"%d",*(int*)nNode->value);
+				}
+				else if(strcmp(nNode->type,"float")==0 ||strcmp(nNode->type,"const_float")==0){
+					sprintf($$,"%f",*(float*)nNode->value);
+				}
+				else if(strcmp(nNode->type,"string")==0 ||strcmp(nNode->type,"const_string")==0){
+					$$= (char*)nNode->value;
+				}
+				else if(strcmp(nNode->type,"bool")==0 ||strcmp(nNode->type,"const_bool")==0){
+					$$= (char*)nNode->value;
+				}
+				else{
+					printf("error can't print type %s variable\n",nNode->type);
+				}
+				//printf("%s\n",$$);
+			}
+		} |
+		array_exp{
+			Trace("Reducing to exp\n");
+		} |
+		const_val{
+			$$=$1;
+			Trace("Reducing to exp\n");
+		}
 		;
-
-
 num_exp:	
-		num_exp PLUS num_exp |
-		num_exp MINUS num_exp |
-		num_exp MUTI num_exp |
-		num_exp DIVIDE num_exp |
-		INTEGER |
-		IDENTIFIER
+		num_exp PLUS num_exp_arg
+		{
+		  printf("Reducing to integer expression\n");
+		  sprintf($$, "%d", (atoi($1) + atoi($3)));
+		  typeVal = 0;
+		}
+		|
+		num_exp MINUS num_exp_arg
+		{
+		  sprintf($$, "%f", (atof($1) - atof($3)));
+		  typeVal = 0;
+		}
+		|
+		num_exp MULTIPLY num_exp_arg
+		{
+		  sprintf($$, "%f", (atof($1) * atof($3)));
+		  typeVal = 0;
+		}
+		|
+		num_exp DIVIDE num_exp_arg
+		{
+		  sprintf($$, "%f", (atof($1) / atof($3)));
+		  typeVal = 1;
+		}
+		|
+		MINUS num_exp_arg %prec UMINUS
+		{
+		  Trace("Reducing to expression\n");
+		  sprintf($$, "%f", (atof($2) * -1));
+		  typeVal = 1;
+		}
+		|
+		num_exp_arg
 		;
-
+num_exp_arg:
+		INTEGER
+		{
+		  $$ = $1;
+		  typeVal = 0;
+		  Trace("Reducing to int_exp_arg\n");
+		}
+		|
+		IDENTIFIER
+		{
+		  Node *nNode = NodeSearch(Top(SymbolTable)->Table, $1);
+		  if(nNode->type == "int"){
+		    sprintf($$, "%d", *(int*)nNode->value);
+		    typeVal = 0;
+		  }
+		  else{
+		    printf("Error: the type is not int\n");
+		  }
+		}
+		;
 bool_exp:	
 		bool_exp LOGICAL_OR bool_exp |
 		bool_exp LOGICAL_AND bool_exp |
 		LOGICAL_NOT bool_exp |
+		num_exp LESS num_exp_arg |
+		num_exp LESSEQ num_exp_arg |
+		num_exp LARGER num_exp_arg |
+		num_exp LARGEREQ num_exp_arg |
+		num_exp EQ num_exp_arg |
+		num_exp NOTEQ num_exp_arg |
 		TRUE |
 		FALSE
 		;
@@ -441,21 +670,25 @@ const_val:
 		INTEGER{
 			$$ = $1; 
 			typeVal = 0;
+			Trace("Reducing to value int\n");
 		}
 		|
 		REAL{
 			$$ = $1;
 			typeVal = 1;
+			Trace("Reducing to value real\n");
 		}
 		|
 		TRUE{
 			$$ = $1;
 			typeVal = 3;
+			Trace("Reducing to value true\n");
 		}
 		|
 		FALSE{
 			$$ = $1;
 			typeVal = 3;
+			Trace("Reducing to value false\n");
 		}
 		|
 		STRING{

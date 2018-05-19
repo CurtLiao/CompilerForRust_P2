@@ -88,14 +88,14 @@ void tablePrint(Node *nowID){
       printf("%s\t%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value,nowID->conOrvar);
       return;
     }
-    printf("%s\t%s\t%d%s\n", nowID->name, nowID->type, *((int*)nowID->value),nowID->conOrvar);
+    printf("%s\t%s\t%d\t%s\n", nowID->name, nowID->type, *((int*)nowID->value),nowID->conOrvar);
   }
   else if(strcmp(nowID->type, "const_int") == 0){
     if(nowID->value == NULL){
       printf("%s\t%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value,nowID->conOrvar);
       return;
     }
-    printf("%s\t%s\t%d%s\n", nowID->name, NULL, *((int*)nowID->value),nowID->conOrvar);
+    printf("%s\t%s\t%d\t%s\n", nowID->name, NULL, *((int*)nowID->value),nowID->conOrvar);
   }
   else if(strcmp(nowID->type, "string") == 0){
     if(nowID->value == NULL){
@@ -139,17 +139,29 @@ void tablePrint(Node *nowID){
     }
     printf("%s\t%s\t%s\t%s\n", nowID->name, NULL, (char*)nowID->value,nowID->conOrvar);
   }
-  else if(strcmp(nowID->type, "int_array") == 0){
+  else if(strcmp(nowID->type, "int_arr") == 0){
     printf("%s\t%s\t%d\n", nowID->name, nowID->type, *(int*)nowID->value);
   }
-  else if(strcmp(nowID->type, "str_array") == 0){
+  else if(strcmp(nowID->type, "str_arr") == 0){
     printf("%s\t%s\t%d\n", nowID->name, nowID->type, *(int*)nowID->value);
   }
-  else if(strcmp(nowID->type, "float_array") == 0){
+  else if(strcmp(nowID->type, "float_arr") == 0){
     printf("%s\t%s\t%d\n", nowID->name, nowID->type, *(int*)nowID->value);
   }
-  else if(strcmp(nowID->type, "bool_array") == 0){
+  else if(strcmp(nowID->type, "bool_arr") == 0){
     printf("%s\t%s\t%d\n", nowID->name, nowID->type, *(int*)nowID->value);
+  }
+	else if(strcmp(nowID->type, "func_int") == 0){
+    printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
+  }
+	else if(strcmp(nowID->type, "func_float") == 0){
+    printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
+  }
+	else if(strcmp(nowID->type, "func_str") == 0){
+    printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
+  }
+	else if(strcmp(nowID->type, "func") == 0){
+    printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
   }
   else{
     printf("Error: ID type is wrong, type = %s\n", nowID->type);
