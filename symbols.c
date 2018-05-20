@@ -77,10 +77,11 @@ Node* Create(){
 }
 void tablePrint(Node *nowID){
   if(nowID->type == NULL){
-	if(nowID->value ==NULL){
-		printf("%s\t%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value,nowID->conOrvar);
-		return;
-	}
+    printf("%s\t%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
+    if(nowID->value ==NULL){
+       printf("%s\t%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value,nowID->conOrvar);
+       return;
+    }
     printf("%s\t%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value,nowID->conOrvar);
   }
   else if(strcmp(nowID->type, "int") == 0){
@@ -151,16 +152,19 @@ void tablePrint(Node *nowID){
   else if(strcmp(nowID->type, "bool_arr") == 0){
     printf("%s\t%s\t%d\n", nowID->name, nowID->type, *(int*)nowID->value);
   }
-	else if(strcmp(nowID->type, "func_int") == 0){
+  else if(strcmp(nowID->type, "func_int") == 0){
     printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
   }
-	else if(strcmp(nowID->type, "func_float") == 0){
+  else if(strcmp(nowID->type, "func_float") == 0){
     printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
   }
-	else if(strcmp(nowID->type, "func_str") == 0){
+  else if(strcmp(nowID->type, "func_bool") == 0){
     printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
   }
-	else if(strcmp(nowID->type, "func") == 0){
+  else if(strcmp(nowID->type, "func_string") == 0){
+    printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
+  }
+  else if(strcmp(nowID->type, "func") == 0){
     printf("%s\t%s\t%s\n", nowID->name, nowID->type, nowID->value);
   }
   else{
@@ -183,4 +187,8 @@ allSymTab* Top(allSymTab* stack){
 		return nowStack;
 	}
 	return NULL;
+}
+void insert(allSymTab *stack,allSymTab *nowstack){
+  allSymTab *nStack = Top(stack);
+  nStack->next = nowstack;
 }

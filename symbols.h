@@ -25,5 +25,5 @@ void tablePrint(Node *nowNode);//print value
 allSymTab* CreateSt(); //create stack
 allSymTab* Top(allSymTab *stack);//return top of stack
 void Pop(allSymTab *stack);//pop top of stack
-void insert(allSymTab *stack);//insert table to stack
+void insert(allSymTab *stack,allSymTab *nowstack);//insert table to stack
 #endif

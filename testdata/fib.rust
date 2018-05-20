@@ -1,0 +1,27 @@
+/* fib.rust
+ *
+ * This test program computes the Nth Fibonacci number
+ */
+fn adw(s:int)->bool{
+    print "Result of computation: ";
+}
+fn main() {
+    // variables
+    let mut n:int = 8;
+    let mut Fn = 6.5;
+    let mut FNminus1 = 3.1;
+    //let mut temp:int;
+    
+    // compute the nth Fibonacci number
+    while (n > 2) {
+      //temp = Fn;
+      Fn = Fn + FNminus1;
+      //FNminus1 = temp;
+     //n = n - 1;
+    }
+    //let mut g[int,10];
+    
+    //print result
+    print "Result of computation: ";
+    println n;
+}

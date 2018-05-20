@@ -1,6 +1,6 @@
 %{  
 #define Trace(t)        printf(t)
-
+#include<string.h>
 %}
 
 %union
@@ -13,7 +13,7 @@
 
 /* tokens */
 %type <mnString> type
-%type <mnString> const_val exp num_exp num_exp_arg bool_exp
+%type <mnString> const_val exp num_exp num_exp_arg bool_exp string_exp real_exp real_exp_argu
 %token CONTINUE BREAK DO ELSE ENUM EXTERN FOR FN IF IN  LET LOOP MATCH MUT PRINT PRINTLN PUB RETURN SELF STATIC USE WHERE WHILE
 %token STRUCT CHAR  
 %token RIGHT_BRACE LEFT_BRACE RIGHT_BRACK LEFT_BRACK RIGHT_PARENT LEFT_PARENT COMMA COLON SEMICOLON            
@@ -79,30 +79,81 @@ func_declared:
 func_declars:
 		FN IDENTIFIER LEFT_PARENT func_argu RIGHT_PARENT MINUS LARGER type block{
 			Trace("Reducing to func_declared\n");
-			Node *nNode = NodeSearch(Top(SymbolTable)->Table,$2);
-			if(nNode==NULL){
-				nNode = NodeCreate($2);
-				nNode->type="func_";
-				strcat(nNode->type,$8);
-				NodeInsert(Top(SymbolTable)->Table,nNode);
-				dump(Top(SymbolTable)->Table);
+			if(NodeSearch(Top(SymbolTable)->Table,$2)==NULL){
+				Node *nNode = NodeCreate($2);
+				
+				
+				if(strcmp("int",$8)== 0){
+					nNode->type = "func_int";
+					
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else if(strcmp("float",$8)== 0){
+					nNode->type = "func_float";
+					
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else if(strcmp("bool",$8)== 0){
+					nNode->type = "func_bool";
+					
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else if(strcmp("string",$8)== 0){
+					nNode->type = "func_string";
+					
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else{
+					printf("type val out of range\n");
+					typeVal = 4;
+				}
+				//dump(Top(SymbolTable)->Table);
 			}
 			else{
-				printf("%s existed\n",$2);
+				printf("Identifier %s existed\n",$2);
 			}
 		} |
 		FN IDENTIFIER LEFT_PARENT RIGHT_PARENT MINUS LARGER type block{
 			Trace("Reducing to func_declared no func argument\n");
-			Node *nNode = NodeSearch(Top(SymbolTable)->Table,$2);
-			if(nNode==NULL){
-				nNode = NodeCreate($2);
-				nNode->type="func_";
-				strcat(nNode->type,$7);
-				NodeInsert(Top(SymbolTable)->Table,nNode);
-				dump(Top(SymbolTable)->Table);
+			if(NodeSearch(Top(SymbolTable)->Table,$2)==NULL){
+				Node *nNode = NodeCreate($2);
+				
+				if(strcmp("int",$7)== 0){
+					nNode->type = "func_int";
+					
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else if(strcmp("float",$7)== 0){
+					nNode->type = "func_float";
+					
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else if(strcmp("bool",$7)== 0){
+					nNode->type = "func_bool";
+					
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else if(strcmp("string",$7)== 0){
+					nNode->type = "func_string";
+					
+					typeVal = 4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+				}
+				else{
+					printf("type val out of range\n");
+					typeVal = 4;
+				}
+				//dump(Top(SymbolTable)->Table);
 			}
 			else{
-				printf("%s existed\n",$2);
+				printf("Identifier %s existed\n",$2);
 			}
 		} |
 		FN IDENTIFIER LEFT_PARENT func_argu RIGHT_PARENT block{
@@ -113,7 +164,7 @@ func_declars:
 				nNode->type="func";
 				
 				NodeInsert(Top(SymbolTable)->Table,nNode);
-				dump(Top(SymbolTable)->Table);
+				//dump(Top(SymbolTable)->Table);
 			}
 			else{
 				printf("%s existed\n",$2);
@@ -125,9 +176,10 @@ func_declars:
 			if(nNode==NULL){
 				nNode = NodeCreate($2);
 				nNode->type="func";
+				printf("no type func = %s\n",nNode->type);
 				
 				NodeInsert(Top(SymbolTable)->Table,nNode);
-				dump(Top(SymbolTable)->Table);
+				//dump(Top(SymbolTable)->Table);
 			}
 			else{
 				printf("%s existed\n",$2);
@@ -136,8 +188,34 @@ func_declars:
 		;
 
 func_argu:
-		func_argu COMMA IDENTIFIER COLON type |
-		IDENTIFIER COLON type
+		func_argu COMMA IDENTIFIER COLON type{
+			Trace("Reducing to func_argu\n");
+			Node *nNode = NodeSearch(Top(SymbolTable)->Table,$3);
+			if(nNode==NULL){
+				nNode = NodeCreate($3);
+				nNode->type= $5;
+				
+				NodeInsert(Top(SymbolTable)->Table,nNode);
+				//dump(Top(SymbolTable)->Table);
+			}
+			else{
+				printf("%s existed\n",$3);
+			}
+		} |
+		IDENTIFIER COLON type{
+			Trace("Reducing to func_argu\n");
+			Node *nNode = NodeSearch(Top(SymbolTable)->Table,$1);
+			if(nNode==NULL){
+				nNode = NodeCreate($1);
+				nNode->type= $3;
+				
+				NodeInsert(Top(SymbolTable)->Table,nNode);
+				//dump(Top(SymbolTable)->Table);
+			}
+			else{
+				printf("%s existed\n",$1);
+			}
+		}
 		;
 
 //ID DEFINE
@@ -151,7 +229,7 @@ var_declared:
 				//printf("%s\t%s\t%s\t%s\n", nNode->name, nNode->type, nNode->value,nNode->conOrvar);
 				typeVal = 4;
 				NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
-				dump(Top(SymbolTable)->Table);
+				//dump(Top(SymbolTable)->Table);
 			}
 			else{
 				printf("Identifier %s existed\n",$3);
@@ -189,7 +267,7 @@ var_declared:
 					printf("type val out of range\n");
 					typeVal = 4;
 				}
-				dump(Top(SymbolTable)->Table);
+				//dump(Top(SymbolTable)->Table);
 			}
 			else{
 				printf("Identifier %s existed\n",$3);
@@ -242,7 +320,7 @@ var_declared:
 					printf("type val out of range\n");
 					typeVal = 4;
 				}
-				dump(Top(SymbolTable)->Table);
+				//dump(Top(SymbolTable)->Table);
 			}
 			else{
 				printf("Identifier %s existed\n",$3);
@@ -295,7 +373,7 @@ var_declared:
 					printf("type val out of range\n");
 					typeVal = 4;
 				}
-				dump(Top(SymbolTable)->Table);
+				//dump(Top(SymbolTable)->Table);
 			}
 			else{
 				printf("Identifier %s existed\n",$3);
@@ -351,7 +429,7 @@ const_declared:
 					printf("type val out of range\n");
 					typeVal = 4;
 				}
-				dump(Top(SymbolTable)->Table);
+				//dump(Top(SymbolTable)->Table);
 			}
 			else{
 				printf("Identifier %s existed\n",$2);
@@ -424,7 +502,7 @@ const_declared:
 					printf("type val out of range\n");
 					typeVal = 4;				
 				}
-				dump(Top(SymbolTable)->Table);
+				//dump(Top(SymbolTable)->Table);
 			}
 			else{
 				printf("Identifier %s existed\n",$2);
@@ -434,7 +512,7 @@ const_declared:
 		;
 arr_declared:
 		LET MUT IDENTIFIER LEFT_BRACK type COMMA num_exp RIGHT_BRACK{
-			Trace("Reducing to arr_declared\n");
+			//Trace("Reducing to arr_declared\n");
 			Node *nNode = NodeSearch(Top(SymbolTable)->Table,$3);
 			int ex=1;
 			if(nNode==NULL){
@@ -444,14 +522,44 @@ arr_declared:
 			int *temp = *(int*)malloc(sizeof(int));
 			*temp = atoi($7);
 			void *val = (void*)temp;
-			char *st = strdup($5);
-			strcat(st,"_array");
-			nNode->type=st;
-			nNode->value=val;
+			if(typearr == 0){
+					nNode->type = "int_arr";
+					nNode->value=val;
+					//typeVal = 4;
+					typearr=4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+			}
+			else if(typearr == 1){
+					nNode->type = "float_arr";
+					nNode->value=val;
+					//typeVal = 4;
+					typearr=4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+			}
+			else if(typearr == 3){
+					nNode->type = "bool_arr";
+					nNode->value=val;
+					//typeVal = 4;
+					typearr=4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+			}
+			else if(typearr == 2){
+					nNode->type = "string_arr";
+					nNode->value=val;
+					//typeVal = 4;
+					typearr=4;
+					NodeInsert(Top(SymbolTable)->Table,nNode);//not finish
+			}
+			else{
+					printf("type val out of range\n");
+					//typeVal = 4;
+					typearr=4;
+			}
+			Trace("Reducing to arr_declared no value\n");
 			if(ex==0){
 				NodeInsert(Top(SymbolTable)->Table,nNode);
 			}
-			dump(Top(SymbolTable)->Table);
+			//dump(Top(SymbolTable)->Table);
 		}
 		;
 simple:		
@@ -514,8 +622,9 @@ simple:
 				printf("%f",atof($2));
 			}
 			else{
-				printf("%s",$2);
+				printf("%s\n",$2);
 			}
+			typeVal=4;
 		} |
 		PRINTLN exp{
 			Trace("Reducing to simple\n");
@@ -533,8 +642,12 @@ simple:
 		RETURN exp{Trace("Reducing to simple\n");}
 		;
 block:		
-		LEFT_BRACE normal_declared statement RIGHT_BRACE |
-		LEFT_BRACE statement RIGHT_BRACE
+		LEFT_BRACE normal_declared statement RIGHT_BRACE{
+			//dump(Top(SymbolTable)->Table);
+		} |
+		LEFT_BRACE statement RIGHT_BRACE{
+			//dump(Top(SymbolTable)->Table);
+		}
 		;
 func_invoke:
 		IDENTIFIER LEFT_PARENT func_invoke_argu RIGHT_PARENT{
@@ -553,14 +666,26 @@ loop:
 		WHILE LEFT_PARENT bool_exp RIGHT_PARENT block
 		;
 
-exp:		
+exp:	
+		real_exp{
+			Trace("Reducing to real_exp\n");
+			$$=$1;
+			typeVal = 1;
+		} |
+		string_exp{
+			Trace("Reducing to exp string_exp\n");
+			$$=$1;
+			typeVal=2;
+		} |	
 		bool_exp{
 			Trace("Reducing to exp\n");
 			$$=$1;
+			typeVal = 3;
 		} |
 		num_exp{
 			Trace("Reducing to expression\n");
 		  	$$ = $1;
+			typeVal = 0;
 		} |
 		func_invoke{
 			Trace("Reducing to exp\n");
@@ -574,15 +699,19 @@ exp:
 			else{
 				if(strcmp(nNode->type,"int")==0 ||strcmp(nNode->type,"const_int")==0){
 					sprintf($$,"%d",*(int*)nNode->value);
+					typeVal = 0;
 				}
 				else if(strcmp(nNode->type,"float")==0 ||strcmp(nNode->type,"const_float")==0){
 					sprintf($$,"%f",*(float*)nNode->value);
+					typeVal = 1;
 				}
 				else if(strcmp(nNode->type,"string")==0 ||strcmp(nNode->type,"const_string")==0){
 					$$= (char*)nNode->value;
+					typeVal = 2;
 				}
 				else if(strcmp(nNode->type,"bool")==0 ||strcmp(nNode->type,"const_bool")==0){
 					$$= (char*)nNode->value;
+					typeVal = 3;
 				}
 				else{
 					printf("error can't print type %s variable\n",nNode->type);
@@ -598,6 +727,67 @@ exp:
 			Trace("Reducing to exp\n");
 		}
 		;
+string_exp:
+		STRING{
+			$$=$1;
+			typeVal = 2;
+		}
+		;
+real_exp:
+		real_exp PLUS real_exp_argu
+		{
+		  printf("Reducing to integer expression\n");
+		  sprintf($$, "%f", (atof($1) + atof($3)));
+		  typeVal = 1;
+		}
+		|
+		real_exp MINUS real_exp_argu
+		{
+		  sprintf($$, "%f", (atof($1) - atof($3)));
+		  typeVal = 1;
+		}
+		|
+		real_exp MUTI real_exp_argu
+		{
+		  sprintf($$, "%f", (atof($1) * atof($3)));
+		  typeVal = 1;
+		}
+		|
+		real_exp DIVIDE real_exp_argu
+		{
+		  sprintf($$, "%f", (atof($1) / atof($3)));
+		  typeVal = 1;
+		}
+		|
+		MINUS real_exp_argu %prec UMINUS
+		{
+		  Trace("Reducing to expression uminus\n");
+		  sprintf($$, "%f", (atof($2) * (-1)));
+		  typeVal = 1;
+		}
+		|
+		real_exp_argu
+		;
+real_exp_argu:
+		REAL
+		{
+		  $$ = $1;
+		  typeVal = 1;
+		  Trace("Reducing to real_exp_argu\n");
+		}
+		|
+		IDENTIFIER
+		{
+		  Node *nNode = NodeSearch(Top(SymbolTable)->Table, $1);
+		  if(nNode->type == "float"){
+		    sprintf($$, "%f", *(float*)nNode->value);
+		    typeVal = 1;
+		  }
+		  else{
+		    printf("Error: the type is not int\n");
+		  }
+		}
+		;
 num_exp:	
 		num_exp PLUS num_exp_arg
 		{
@@ -608,27 +798,27 @@ num_exp:
 		|
 		num_exp MINUS num_exp_arg
 		{
-		  sprintf($$, "%f", (atof($1) - atof($3)));
+		  sprintf($$, "%d", (atoi($1) - atoi($3)));
 		  typeVal = 0;
 		}
 		|
-		num_exp MULTIPLY num_exp_arg
+		num_exp MUTI num_exp_arg
 		{
-		  sprintf($$, "%f", (atof($1) * atof($3)));
+		  sprintf($$, "%d", (atoi($1) * atoi($3)));
 		  typeVal = 0;
 		}
 		|
 		num_exp DIVIDE num_exp_arg
 		{
-		  sprintf($$, "%f", (atof($1) / atof($3)));
-		  typeVal = 1;
+		  sprintf($$, "%d", (atoi($1) / atoi($3)));
+		  typeVal = 0;
 		}
 		|
 		MINUS num_exp_arg %prec UMINUS
 		{
-		  Trace("Reducing to expression\n");
-		  sprintf($$, "%f", (atof($2) * -1));
-		  typeVal = 1;
+		  Trace("Reducing to expression uminus\n");
+		  sprintf($$, "%f", (atoi($2) * (-1)));
+		  typeVal = 0;
 		}
 		|
 		num_exp_arg
@@ -701,19 +891,23 @@ type:
 		BOOL{
 			$$ = "bool";
 			typeVal = 3;
+			//typearr=3;
 		} |
 		INT{
 			$$ = "int";
 			typeVal = 0;
+			//typearr=0;
 		} |
 		STR{
 			$$ = "string";
 			typeVal = 2;
+			//typearr=2;
 			Trace("Reducing to type string\n");
 		} |
 		FLOAT{
 			$$ = "float";
 			typeVal = 1;
+			//typearr=1;
 		}
 		;
 %%
@@ -725,6 +919,7 @@ char *msg;
     fprintf(stderr, "%s\n", msg);
 }
 int typeVal = 4;
+int typearr = 4;
 allSymTab *SymbolTable = NULL;
 main(int argc,char **argv)
 {
@@ -736,7 +931,9 @@ main(int argc,char **argv)
     yyin = fopen(argv[1], "r");         /* open input file */
 
     SymbolTable = CreateSt();
+
     /* perform parsing */
     if (yyparse() == 1)                 /* parsing */
         yyerror("Parsing error !");     /* syntax error */
+	dump(Top(SymbolTable)->Table);
 }
